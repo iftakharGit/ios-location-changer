@@ -24,3 +24,13 @@ dist/
 
 # Logs
 *.log
+
+# Testing Cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Archives (Prevent committing large binaries manually)
+*.zip
+*.tar.gz
+*.dmg

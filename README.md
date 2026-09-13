@@ -1,94 +1,88 @@
-# iOS Location Changer (V2.1 - Production Ready)
+# 🌍 iOS Location Changer (V2)
 
-A commercial-grade, fully local iOS location spoofer designed for Apple Silicon macOS and modern iOS (17+) devices. 
+![CI/CD Pipeline](https://github.com/iftakhar.ahamad/ios-location-changer/actions/workflows/ci-cd.yml/badge.svg)
+![Python 3.14+](https://img.shields.io/badge/python-3.14%2B-blue.svg)
+![macOS Support](https://img.shields.io/badge/os-macOS-silver.svg)
 
-This application bypasses traditional GPS dongles by establishing an Apple `CoreDevice` RemotePairing tunnel over USB using `pymobiledevice3`, manipulating the iOS Developer Mode Location Simulation service.
+A premium, open-source macOS desktop application for overriding the GPS location of iOS 17+ devices—**no jailbreak required**. 
 
-## 🚀 Key Features & Security
-- **Pure Userspace Tunnel:** Bypasses macOS Sandbox restrictions and `remoted` privilege issues by handling the entire iOS 17 networking stack in pure Python.
-- **Joystick Movement:** WASD directional controls synchronized at 100ms for video-game smooth gliding.
-- **Constant-Velocity Route Simulation:** Uses Delta-Time math to calculate exact distances across waypoints regardless of CPU throttling.
-- **Strict Data Validation:** Incoming coordinates are strictly bounded by Pydantic validators (-90 to 90 lat, -180 to 180 lng) to prevent device crashing.
-- **Thread-Safe Architecture:** Powered by `FastAPI` and an `asyncio.Queue` state manager to ensure perfect thread safety. All globals have been encapsulated into OOP states (`JoystickState`, `DeviceManager`) to eliminate race conditions.
-- **Active Health-Checking:** Instead of hardcoded sleep delays, the launcher uses active socket health checks to dynamically bind to safe network ports and wait for the ASGI server to boot.
+Built entirely on modern Python (FastAPI + pymobiledevice3) and PyWebView, this tool leverages Apple's official Developer Disk Image (CoreDevice) to establish a secure userspace tunnel, allowing you to seamlessly teleport, walk, or drive around the globe.
 
 ---
 
-## 🛠 Architecture
-* **Frontend:** HTML, TailwindCSS, ES6 JavaScript Modules (Map, Joystick, API handlers). Polling loops are strictly guarded with in-flight flags.
-* **Backend:** FastAPI (ASGI Server), `uvicorn` background thread locked securely behind strict CORS (`127.0.0.1` only).
-* **Hardware Bridge:** `pymobiledevice3` (DVT Provider & Location Simulation).
-* **Desktop Wrapper:** `pywebview` serving the local FastAPI instance on a dynamically allocated port.
+## ✨ Features
+
+* 🗺️ **Interactive Mapping:** Point-and-click teleportation using a beautiful Leaflet map.
+* 🕹️ **Real-Time Joystick:** Use your keyboard's `W A S D` keys to walk naturally around the map.
+* 🚀 **Auto-App Launching:** Automatically wake your iPhone and launch specific apps (like Apple Maps or Pokémon GO) the exact millisecond the spoofing tunnel connects.
+* 📍 **Drag-and-Drop GPX Loader:** Drag any `.gpx` hiking or driving route onto the window to instantly load and simulate the path.
+* 🏎️ **Dynamic Speed Engine:** Seamlessly slide your movement speed from a 5mph "Walk" to a 40mph "Drive" mid-route without stuttering.
+* 🛰️ **Dynamic Map Layers:** Instantly toggle between standard street views, Esri high-resolution Satellite imagery, and topographical Terrain.
+* 🎨 **Native UI:** Enjoy a gorgeous macOS "frosted glass" interface (Vibrancy) built with Tailwind CSS.
 
 ---
 
-## 💻 Developer Setup
+## 🚀 Getting Started (For End Users)
 
-### 1. Prerequisites
-- **macOS** (Apple Silicon recommended)
-- **Python 3.10+**
-- **iPhone on iOS 16/17+** with **Developer Mode Enabled** (Settings > Privacy & Security > Developer Mode).
+You do not need to install Python or know how to code to use this application!
 
-### 2. Installation
-Dependencies are strictly pinned in `requirements.txt` to guarantee reproducible builds.
+1. Go to the [Releases Tab](../../releases/latest).
+2. Download the latest `Location_Changer_macOS.zip`.
+3. Unzip the file and double-click `Location Changer.app`.
+4. Plug in your iPhone via USB, ensure **Developer Mode** is enabled in your iOS Privacy settings, and click **Connect**!
 
+---
+
+## 🛠️ Development Setup (For Developers)
+
+iOS Location Changer uses a strict MVC architecture separating the FastAPI backend from the pure ES6 JavaScript frontend.
+
+### Prerequisites
+* macOS (Apple Silicon or Intel)
+* Python 3.14+
+* Xcode Command Line Tools (`xcode-select --install`)
+
+### Installation
 ```bash
-# Clone or open the repository directory
-cd "Location changer app"
+# Clone the repository
+git clone https://github.com/yourusername/ios-location-changer.git
+cd ios-location-changer
 
 # Create and activate a virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
-# Install strictly pinned dependencies
+# Install dependencies
 pip install -r requirements.txt
-```
 
-### 3. Running Locally for Development
-Run the application directly via Python. Hot-reloading the UI is as simple as refreshing the webview, but backend changes require restarting the script.
-```bash
+# Run the application
 python app.py
 ```
 
-### 4. Compiling the Production `.app` Bundle
-To package the application into a standalone macOS `.app` that can be dragged into the Applications folder, use PyInstaller. 
-
-We aggressively bundle `uvicorn` and `fastapi` hidden imports to ensure the ASGI server boots correctly inside the macOS Sandbox:
-
+### Compiling the App
+To build your own standalone `.app` bundle using PyInstaller:
 ```bash
-source venv/bin/activate
-
 pyinstaller --clean --windowed --name "Location Changer" \
-  --add-data "templates:templates" \
-  --add-data "static:static" \
-  --collect-all uvicorn \
-  --collect-all fastapi \
-  app.py --noconfirm
+  --add-data "templates:templates" --add-data "static:static" \
+  --collect-all uvicorn --collect-all fastapi app.py --noconfirm
 ```
-
-The resulting application will be located at `dist/Location Changer.app`.
+*(Note: A GitHub Actions CI/CD pipeline is already configured in `.github/workflows/ci-cd.yml` to automatically lint, test, and compile the app for you on every push!)*
 
 ---
 
-## 📁 Project Structure
-```text
-.
-├── app.py                      # Pywebview launcher, Dynamic Ports & Active Health Checks
-├── backend/
-│   ├── api.py                  # FastAPI router, CORS, Pydantic guards, and Joystick loop
-│   └── device_manager.py       # OOP state manager and pymobiledevice3 Asyncio Queue
-├── static/
-│   └── js/
-│       ├── api.js              # Fetch API wrappers
-│       ├── joystick.js         # WASD vector logic and Status polling
-│       └── map.js              # Leaflet mapping, Layer caching, and Delta-Time math
-├── templates/
-│   └── index.html              # Tailwind UI layout (cached in memory on startup)
-├── tools/                      
-│   └── spoofer.py              # Legacy diagnostic CLI scripts (excluded from production bundle)
-├── requirements.txt            # Pinned Python dependencies
-└── dist/                       # PyInstaller output directory
-```
+## ⚖️ Disclaimer
+*This software is provided for educational and testing purposes only. The developer assumes no liability for accounts banned by third-party applications or services resulting from the use of this tool.*
 
-## ⚠️ Known Behaviors
-- **Audio Routing:** Because this utilizes Apple's RemotePairing network interface, macOS may occasionally think the iPhone is plugged in for "Continuity Camera" and route the iPhone's audio to the Mac. To disable this, turn off **Continuity Camera** in your iPhone's AirPlay & Handoff settings.
+---
+
+## 📜 Acknowledgments & Third-Party Licenses
+
+This application is made possible thanks to the incredible work of the open-source community. The following libraries are bundled with or utilized by this software:
+
+* **[pymobiledevice3](https://github.com/doronz88/pymobiledevice3)** - Copyright (c) Doron Z. (MIT License)
+* **[FastAPI](https://fastapi.tiangolo.com/)** - Copyright (c) 2018 Sebastián Ramírez (MIT License)
+* **[pywebview](https://pywebview.flowrl.com/)** - Copyright (c) 2014-2024 Roman Sirokov (BSD 3-Clause License)
+* **[Leaflet.js](https://leafletjs.com/)** - Copyright (c) 2010-2023, Vladimir Agafonkin / CloudMade (BSD 2-Clause License)
+* **[Tailwind CSS](https://tailwindcss.com/)** - Copyright (c) Tailwind Labs, Inc. (MIT License)
+
+*All third-party trademarks and trade names belong to their respective owners.*
