@@ -1,0 +1,26 @@
+# Python Environments & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# PyInstaller Build Artifacts
+build/
+dist/
+*.spec
+
+# macOS & OS Files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDEs & Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
