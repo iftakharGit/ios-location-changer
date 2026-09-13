@@ -1,6 +1,6 @@
 # 🌍 iOS Location Changer (V2)
 
-![CI/CD Pipeline](https://github.com/iftakhar.ahamad/ios-location-changer/actions/workflows/ci-cd.yml/badge.svg)
+![CI/CD Pipeline](https://github.com/iftakharGit/ios-location-changer/actions/workflows/ci-cd.yml/badge.svg)
 ![Python 3.14+](https://img.shields.io/badge/python-3.14%2B-blue.svg)
 ![macOS Support](https://img.shields.io/badge/os-macOS-silver.svg)
 
@@ -45,7 +45,7 @@ iOS Location Changer uses a strict MVC architecture separating the FastAPI backe
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ios-location-changer.git
+git clone https://github.com/iftakharGit/ios-location-changer.git
 cd ios-location-changer
 
 # Create and activate a virtual environment

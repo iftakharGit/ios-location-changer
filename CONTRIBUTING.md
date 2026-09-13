@@ -7,7 +7,7 @@ First off, thank you for considering contributing to iOS Location Changer! It's 
 1. **Fork the repository** on GitHub.
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/your-username/ios-location-changer.git
+   git clone https://github.com/iftakharGit/ios-location-changer.git
    cd ios-location-changer
    ```
 3. **Set up your Python virtual environment** (Requires Python 3.14+):
