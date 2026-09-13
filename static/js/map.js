@@ -3,7 +3,19 @@ import { teleportAPI } from './api.js';
 export class MapManager {
     constructor() {
         this.map = L.map('map').setView([51.505, -0.09], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(this.map);
+        
+        const standard = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 });
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Esri' });
+        const terrain = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Esri' });
+        
+        const baseMaps = {
+            "Standard": standard,
+            "Satellite": satellite,
+            "Terrain": terrain
+        };
+        
+        standard.addTo(this.map);
+        L.control.layers(baseMaps).addTo(this.map);
         
         this.currentMarker = L.marker([51.505, -0.09]).addTo(this.map);
         this.selectedLat = null;
@@ -15,8 +27,64 @@ export class MapManager {
         this.routeInterval = null;
 
         this.map.on('click', (e) => this.updateSelection(e.latlng.lat, e.latlng.lng));
+        
         this.map.on('contextmenu', (e) => this.addWaypoint(e.latlng.lat, e.latlng.lng));
+        this.setupDragAndDrop();
     }
+
+    setupDragAndDrop() {
+        const mapContainer = document.getElementById('map');
+        
+        mapContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            mapContainer.style.opacity = '0.7';
+        });
+
+        mapContainer.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            mapContainer.style.opacity = '1';
+        });
+
+        mapContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            mapContainer.style.opacity = '1';
+            
+            if (e.dataTransfer.files.length > 0) {
+                const file = e.dataTransfer.files[0];
+                file.text().then(content => {
+                    this.parseAndLoadGPX(content);
+                }).catch(err => console.error(err));
+            }
+        });
+    }
+
+    parseAndLoadGPX(xmlString) {
+        try {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+            const trackPoints = xmlDoc.getElementsByTagName('trkpt');
+            
+            if (trackPoints.length === 0) {
+                return (window.showToast || console.log)("No track points found in GPX file.");
+            }
+            
+            this.clearRoute(); // Reset existing
+            
+            for (const point of trackPoints) {
+                const lat = Number.parseFloat(point.getAttribute('lat'));
+                const lon = Number.parseFloat(point.getAttribute('lon'));
+                this.addWaypoint(lat, lon);
+            }
+            
+            this.map.fitBounds(this.polyline.getBounds());
+            (window.showToast || console.log)(`Loaded ${trackPoints.length} waypoints from GPX!`);
+            
+        } catch (error) {
+            console.error("Error parsing GPX:", error);
+            (window.showToast || console.log)("Invalid GPX file format.");
+        }
+    }
+
 
     updateSelection(lat, lng) {
         this.selectedLat = lat;

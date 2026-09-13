@@ -30,13 +30,13 @@ export class JoystickManager {
     }
 
     updateJoyDirection() {
-        const y = (this.keysPressed['w'] ? 1 : 0) + (this.keysPressed['s'] ? -1 : 0);
-        const x = (this.keysPressed['d'] ? 1 : 0) + (this.keysPressed['a'] ? -1 : 0);
+        const moveY = (this.keysPressed['w'] ? 1 : 0) + (this.keysPressed['s'] ? -1 : 0);
+        const moveX = (this.keysPressed['d'] ? 1 : 0) + (this.keysPressed['a'] ? -1 : 0);
 
-        if (x === 0 && y === 0) {
+        if (moveX === 0 && moveY === 0) {
             this.stopJoy();
         } else {
-            let heading = Math.atan2(x, y) * (180 / Math.PI);
+            let heading = Math.atan2(moveX, moveY) * (180 / Math.PI);
             if (heading < 0) heading += 360;
             
             if (!this.joyActive) {

@@ -37,7 +37,7 @@ if __name__ == "__main__":
                 time.sleep(0.2)
         
         logging.info("Starting webview...")
-        window = webview.create_window('iOS Location Changer (V2)', f'http://127.0.0.1:{port}', width=1000, height=700)
+        window = webview.create_window('iOS Location Changer (V2)', f'http://127.0.0.1:{port}', width=1000, height=700, transparent=True, vibrancy=True)
         webview.start()
         
         logging.info("Webview closed normally.")

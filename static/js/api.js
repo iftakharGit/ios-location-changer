@@ -1,10 +1,14 @@
 // api.js
-export async function toggleConnection(isIntent) {
+export async function toggleConnection(isIntent, bundleId = null) {
     if (isIntent) {
         await fetch('/api/disconnect', {method: 'POST'});
         return false;
     } else {
-        await fetch('/api/connect', {method: 'POST'});
+        await fetch('/api/connect', {
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ bundle_id: bundleId })
+        });
         return true;
     }
 }

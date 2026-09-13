@@ -1,4 +1,5 @@
 import asyncio
+from pymobiledevice3.services.dvt.instruments.process_control import ProcessControl
 import logging
 from pymobiledevice3.services.dvt.instruments.dvt_provider import DvtProvider
 from pymobiledevice3.services.dvt.instruments.location_simulation import LocationSimulation
@@ -6,6 +7,7 @@ from pymobiledevice3.remote import userspace_tunnel
 
 class DeviceManager:
     def __init__(self):
+        self.bundle_id = None
         self.connected = False
         self.intent_to_connect = False
         self.current_lat = None
@@ -14,7 +16,8 @@ class DeviceManager:
         self.last_error = None
         self._task = None
 
-    def connect(self):
+    def connect(self, bundle_id=None):
+        self.bundle_id = bundle_id
         self.intent_to_connect = True
         self.last_error = None
         if self.command_queue is None:
@@ -49,7 +52,7 @@ class DeviceManager:
             logging.info("Establishing userspace DVT tunnel to iPhone...")
             rsd = await userspace_tunnel.establish_userspace_rsd(remotepairing_fallback=False)
             async with DvtProvider(rsd) as dvt, LocationSimulation(dvt) as location:
-                await self._manage_location_session(location)
+                await self._manage_location_session(location, dvt)
         except Exception as e:
             self.connected = False
             self.last_error = str(e)
@@ -58,10 +61,19 @@ class DeviceManager:
                 logging.info("Retrying connection in 3 seconds...")
                 await asyncio.sleep(3)
 
-    async def _manage_location_session(self, location):
+    async def _manage_location_session(self, location, dvt):
         logging.info("Spoofer tunnel ready and maintained!")
         self.connected = True
         self.last_error = None
+        
+        if self.bundle_id:
+            try:
+                async with ProcessControl(dvt) as pc:
+                    await pc.launch(self.bundle_id)
+                    logging.info(f"Auto-launched app: {self.bundle_id}")
+            except Exception as e:
+                logging.exception(f"Failed to auto-launch {self.bundle_id}: {e}")
+                
         if self.current_lat is not None and self.current_lng is not None:
             await location.set(self.current_lat, self.current_lng)
         

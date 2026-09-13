@@ -1,3 +1,4 @@
+from typing import Optional
 import math
 import asyncio
 import os
@@ -103,9 +104,13 @@ async def get_status():
         "lng": device_manager.current_lng
     }
 
+class ConnectRequest(BaseModel):
+    bundle_id: Optional[str] = None
+
 @app.post("/api/connect")
-async def connect_device():
-    device_manager.connect()
+async def connect_device(req: ConnectRequest = None):
+    b_id = req.bundle_id if req else None
+    device_manager.connect(b_id)
     return {"status": "success"}
 
 @app.post("/api/disconnect")
